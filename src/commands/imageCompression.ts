@@ -1,12 +1,14 @@
 import path from 'path';
 import fs from 'fs';
 import * as vscode from 'vscode';
-import Jimp from 'jimp';    // 无法无损压缩
-import sharp from 'sharp';  // 需要底层库
-import imageminJpegtran from 'imagemin-jpegtran';
-import imageminPngquant from 'imagemin-pngquant';
-import imagemin from 'imagemin';
-import images from 'images'; // mac arm 上不行
+// import Jimp from 'jimp';    // 无法无损压缩
+// import sharp from 'sharp';  // 需要底层库
+// import imageminJpegtran from 'imagemin-jpegtran';
+// import imageminPngquant from 'imagemin-pngquant';
+// import imagemin from 'imagemin';
+// import images from 'images'; // mac arm 上不行
+
+import webp from 'webp-converter';
 
 function startMinImage(image: any, path: string, parsedPath: path.ParsedPath) {
        // 编辑器左下角显示压缩中的提示
@@ -15,6 +17,13 @@ function startMinImage(image: any, path: string, parsedPath: path.ParsedPath) {
 	);
     statusBarItem.text = `Compression file ${image?.fsPath}`;
 	statusBarItem.show();
+
+    const result = webp.cwebp(image.fsPath, path + `/${parsedPath.name}.webp` ,"-q 80");
+
+    result.then((response: any) => {
+        statusBarItem.hide();
+        vscode.window.showInformationMessage(`Image compressed successfully!`);
+    });
 
     // sharp(image.fsPath)
     // .jpeg({quality: 50})
@@ -46,26 +55,26 @@ function startMinImage(image: any, path: string, parsedPath: path.ParsedPath) {
     //     quality: 50
     // });
 
-    imagemin([image.fsPath], {
-        plugins: [
-            imageminJpegtran(),
-            imageminPngquant({
-                quality: [0.3, 0.5],
-                strip: true,
-            })
-        ]
-    })
-    .then((files: any[]) => {
-        fs.writeFile(path + `/${parsedPath.base}`, files[0].data, () => {
-            vscode.window.showInformationMessage(`Image compressed successfully! `);
-        });
-    })
-    .catch((err: any) => {
-        vscode.window.showInformationMessage(`Error compressing image ${JSON.stringify(err)}`);
-    })
-    .finally(() => {
-        statusBarItem.hide();
-    });
+    // imagemin([image.fsPath], {
+    //     plugins: [
+    //         imageminJpegtran(),
+    //         imageminPngquant({
+    //             quality: [0.3, 0.5],
+    //             strip: true,
+    //         })
+    //     ]
+    // })
+    // .then((files: any[]) => {
+    //     fs.writeFile(path + `/${parsedPath.base}`, files[0].data, () => {
+    //         vscode.window.showInformationMessage(`Image compressed successfully! `);
+    //     });
+    // })
+    // .catch((err: any) => {
+    //     vscode.window.showInformationMessage(`Error compressing image ${JSON.stringify(err)}`);
+    // })
+    // .finally(() => {
+    //     statusBarItem.hide();
+    // });
 }
 
 export default function imageCompression(image: any) {

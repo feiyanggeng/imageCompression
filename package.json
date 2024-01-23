@@ -70,6 +70,7 @@
     "imagemin-pngquant": "^9.0.2",
     "images": "^3.2.4",
     "jimp": "^0.22.10",
-    "sharp": "^0.33.2"
+    "sharp": "^0.33.2",
+    "webp-converter": "^2.3.3"
   }
 }
