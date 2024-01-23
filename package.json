@@ -22,6 +22,10 @@
         ]
       }
     ],
+    "configuration": {
+      "quality": 50,
+      "destination": ""
+    },
     "commands": [
       {
         "command": "image-compression",
