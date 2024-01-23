@@ -5,6 +5,9 @@
 // import imagemin from 'imagemin';
 // import images from 'images'; // mac arm 上不行
 
+const { exec } = require("child_process");
+const path = require("path");
+
 const imageCompression = () => {
     // sharp(image.fsPath)
     // .jpeg({quality: 50})
@@ -57,3 +60,23 @@ const imageCompression = () => {
     //     statusBarItem.hide();
     // });
 };
+
+const pngquant = path.join(__dirname, '../../bin');
+const output = path.join(__dirname, '../../');
+
+function start() {
+    exec(`${pngquant}/libpng_osx/pngquant --quality=30-35 /Users/didi/Documents/项目/didichuxing/image/松枝-1.jpg-fs8.png`,
+    {shell: true},
+    (error, stdout, stderr)=> {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log('success');
+        }
+    }
+    );
+}
+
+
+start();
