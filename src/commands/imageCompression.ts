@@ -18,9 +18,9 @@ function startMinImage(image: any, path: string, parsedPath: path.ParsedPath) {
     statusBarItem.text = `Compression file ${image?.fsPath}`;
 	statusBarItem.show();
 
-    const result = webp.cwebp(image.fsPath, path + `/${parsedPath.name}.webp` ,"-q 80");
+    const result = webp.cwebp(image.fsPath, path + `/${parsedPath.name}.webp` ,"-q 50");
 
-    result.then((response: any) => {
+    result.then(() => {
         statusBarItem.hide();
         vscode.window.showInformationMessage(`Image compressed successfully!`);
     });
