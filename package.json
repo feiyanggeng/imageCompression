@@ -23,8 +23,29 @@
       }
     ],
     "configuration": {
-      "quality": 50,
-      "destination": ""
+      "type": "object",
+      "title": "image-compression configuration",
+      "properties": {
+        "image-compression": {
+          "type":"object",
+          "title": "image-compression",
+          "description": "image-compression 的配置项",
+          "properties": {
+            "quality": {
+              "type":"number",
+              "default": 50,
+              "description": "图片压缩的质量 0-100 值越小，图片越小"
+            },
+            "destination": {
+              "type":"string",
+              "default": "",
+              "description": "图片保存的文件夹，绝对地址"
+            }
+          }
+        }
+        
+      }
+      
     },
     "commands": [
       {
