@@ -3,11 +3,14 @@
   "displayName": "image-compression",
   "description": "一个图片压缩工具",
   "version": "0.0.1",
+  "author": {
+    "name": "gengfeiyang"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Other"
+    "Formatters"
   ],
   "activationEvents": [],
   "main": "./dist/extension.js",
@@ -40,6 +43,11 @@
               "type":"string",
               "default": "",
               "description": "图片保存的文件夹，绝对地址"
+            },
+            "showSelection": {
+              "type":"boolean",
+              "default": false,
+              "description": "是否展示图片类型的选项"
             }
           }
         }
