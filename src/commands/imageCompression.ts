@@ -103,7 +103,7 @@ export default async function imageCompression(image: any) {
     if (!fs.existsSync(customConfig.destination)) {
         fs.mkdir(customConfig.destination, (err: any) => {
             if (err) {
-                vscode.window.showInformationMessage('Failed to create a folder'+customConfig.destination);
+                vscode.window.showErrorMessage('Failed to create a folder'+customConfig.destination);
             } else {
                 vscode.window.showInformationMessage('successed to create a folder'+customConfig.destination);
                 startMinImage(image, customConfig, parsedPath);
