@@ -1,14 +1,48 @@
 import path from 'path';
 import fs from 'fs';
 import * as vscode from 'vscode';
+import { getBufferFromFile } from '../utils/tools';
+import imageminJpegtran from 'imagemin-jpegtran';
+import imageminPngquant from 'imagemin-pngquant';
+import imagemin from 'imagemin';
 import webp from 'webp-converter';
 
-type TType = 'png' |'webp';
+type TType = 'self' |'webp';
 interface ICostomConfig {
     quality: number
     destination: string
     type?: TType
     showSelection?: boolean  // 是否展示 quickpick
+}
+
+function imageMinPlugin(image: any, customConfig: ICostomConfig, parsedPath: path.ParsedPath) {
+    return new Promise(async (resolve, reject) => {
+        const bufferFile = await getBufferFromFile(image.fsPath);
+        let res;
+        try {
+            res = await imagemin.buffer(bufferFile, {
+                plugins: [
+                    imageminJpegtran(),
+                    imageminPngquant({
+                        quality: [0, customConfig.quality/100],
+                    }),
+                ],
+            });
+        } catch (err) {
+            vscode.window.showInformationMessage(JSON.stringify(err));
+            
+            reject(err);
+            res = null;
+            return;
+        }
+        fs.writeFile(customConfig.destination + `/${parsedPath.name}${parsedPath.ext}`, res, () => {
+            resolve('success');
+        });
+    });
+}
+
+function webpPlugin(image: any, customConfig: ICostomConfig, parsedPath: path.ParsedPath) {
+    return webp.cwebp(image.fsPath, customConfig.destination + `/${parsedPath.name}.webp` ,`-q ${customConfig.quality}`);
 }
 
 function startMinImage(image: any, customConfig: ICostomConfig, parsedPath: path.ParsedPath) {
@@ -18,12 +52,23 @@ function startMinImage(image: any, customConfig: ICostomConfig, parsedPath: path
 	);
     statusBarItem.text = `Compression file ${image?.fsPath}`;
 	statusBarItem.show();
+    let result: Promise<any>;
 
-    const result = webp.cwebp(image.fsPath, customConfig.destination + `/${parsedPath.name}.webp` ,`-q ${customConfig.quality}`);
+    vscode.window.showInformationMessage(`${JSON.stringify(customConfig)}${customConfig.type}`);
+    
+
+    if (customConfig.type === 'webp') {
+        result = webpPlugin(image, customConfig, parsedPath);
+    } else {
+        result = imageMinPlugin(image, customConfig, parsedPath);
+    }
 
     result.then(() => {
         statusBarItem.hide();
         vscode.window.showInformationMessage(`Image compressed successfully!`);
+    }).catch(() => {
+        statusBarItem.hide();
+        vscode.window.showInformationMessage(`Image compressed failly!`);
     });
 }
 
@@ -35,13 +80,15 @@ async function createQuickPick(): Promise<TType> {
         const quickPick =  vscode.window.createQuickPick();
         quickPick.items = [
             {label: 'webp', description: '压缩为 webp 格式'},
-            {label: 'png', description: '压缩为 png 格式'},
+            {label: 'self', description: '保持原来的格式 png jpg'},
         ];
         quickPick.show();
 
         quickPick.onDidChangeSelection((e: any) => {
+            vscode.window.showInformationMessage(`${e[0].label}`);
+            resolve(e[0].label);
+
             quickPick.hide();
-            resolve(e.label);
         });
     });
 }
@@ -60,6 +107,7 @@ function readConfiguration(dir: string): ICostomConfig {
     const destination = config.destination || destinationImagePath; // 压缩之后图片放置的地方 绝对路径
 
     const customConfig: ICostomConfig = {
+        ...config,
         quality,
         destination
     };
@@ -95,9 +143,11 @@ export default async function imageCompression(image: any) {
 
     const customConfig: ICostomConfig = readConfiguration(parsedPath.dir);
 
+    vscode.window.showInformationMessage(`${customConfig.showSelection}`);
+
     if (customConfig.showSelection) {
         const type = await createQuickPick();
-        customConfig.type = type;
+        customConfig.type = type || 'webp';
     }
     
     if (!fs.existsSync(customConfig.destination)) {
