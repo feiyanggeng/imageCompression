@@ -2,7 +2,7 @@
   "name": "image-compression",
   "displayName": "image-compression",
   "description": "一个图片压缩工具",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "gengfeiyang"
   },
