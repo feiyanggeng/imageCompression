@@ -54,9 +54,6 @@ function startMinImage(image: any, customConfig: ICostomConfig, parsedPath: path
 	statusBarItem.show();
     let result: Promise<any>;
 
-    vscode.window.showInformationMessage(`${JSON.stringify(customConfig)}${customConfig.type}`);
-    
-
     if (customConfig.type === 'webp') {
         result = webpPlugin(image, customConfig, parsedPath);
     } else {
@@ -85,9 +82,7 @@ async function createQuickPick(): Promise<TType> {
         quickPick.show();
 
         quickPick.onDidChangeSelection((e: any) => {
-            vscode.window.showInformationMessage(`${e[0].label}`);
             resolve(e[0].label);
-
             quickPick.hide();
         });
     });
@@ -98,21 +93,50 @@ async function createQuickPick(): Promise<TType> {
  * @param dir 文件的 文件夹目录
  * @returns 
  */
-function readConfiguration(dir: string): ICostomConfig {
+function readConfiguration(dir: string): Promise<ICostomConfig> {
 
-    let destinationImagePath = path.join(dir, 'image-min');
-    const config = vscode.workspace.getConfiguration('image-compression') || {};
+    return new Promise(async (resolve) => {
+        let destinationImagePath = path.join(dir, 'image-min');
+        const config = vscode.workspace.getConfiguration('image-compression') || {};
 
-    const quality = config.quality || 50;   // 图片压缩的质量
-    const destination = config.destination || destinationImagePath; // 压缩之后图片放置的地方 绝对路径
+        const quality = config.quality || 50;   // 图片压缩的质量
+        const destination = config.destination || destinationImagePath; // 压缩之后图片放置的地方 绝对路径
 
-    const customConfig: ICostomConfig = {
-        ...config,
-        quality,
-        destination
-    };
+        const customConfig: ICostomConfig = {
+            ...config,
+            quality,
+            destination
+        };
 
-    return customConfig;
+        if (customConfig.showSelection) {
+            const type = await createQuickPick();
+            customConfig.type = type || 'webp';
+        }
+
+        resolve(customConfig);
+    });
+}
+
+/**
+ * 创建压缩之后的文件夹
+ * @param customConfig 插件配置
+ * @returns promise
+ */
+async function createFileFold(customConfig: ICostomConfig): Promise<any> {
+    return new Promise((resolve) => {
+        if (!fs.existsSync(customConfig.destination)) {
+            fs.mkdir(customConfig.destination, (err: any) => {
+                if (err) {
+                    vscode.window.showErrorMessage('Failed to create a folder'+customConfig.destination);
+                } else {
+                    vscode.window.showInformationMessage('successed to create a folder'+customConfig.destination);
+                    resolve('success');
+                }
+            });
+        } else {
+            resolve('success');
+        }
+    });
 }
 
 export default async function imageCompression(image: any) {
@@ -141,26 +165,10 @@ export default async function imageCompression(image: any) {
      */
 	const parsedPath = path.parse(image.fsPath);
 
-    const customConfig: ICostomConfig = readConfiguration(parsedPath.dir);
+    const customConfig: ICostomConfig = await readConfiguration(parsedPath.dir);
 
-    vscode.window.showInformationMessage(`${customConfig.showSelection}`);
-
-    if (customConfig.showSelection) {
-        const type = await createQuickPick();
-        customConfig.type = type || 'webp';
-    }
-    
-    if (!fs.existsSync(customConfig.destination)) {
-        fs.mkdir(customConfig.destination, (err: any) => {
-            if (err) {
-                vscode.window.showErrorMessage('Failed to create a folder'+customConfig.destination);
-            } else {
-                vscode.window.showInformationMessage('successed to create a folder'+customConfig.destination);
-                startMinImage(image, customConfig, parsedPath);
-            }
-        });
-    } else {
+    createFileFold(customConfig).then(() => {
         startMinImage(image, customConfig, parsedPath);
-    }
+    });
 
 }
