@@ -146,9 +146,9 @@ export default async function imageCompression(image: any) {
      * 当 image 是 文件的时候的 结构
      * {
             "$mid":1,
-            "fsPath":"/Users/didi/Documents/项目/didichuxing/image/松枝-1.jpg",
-            "external":"file:///Users/didi/Documents/%E9%A1%B9%E7%9B%AE/didichuxing/image/%E6%9D%BE%E6%9E%9D-1.jpg",
-            "path":"/Users/didi/Documents/项目/didichuxing/image/松枝-1.jpg",
+            "fsPath":"",
+            "external":"",
+            "path":"",
             "scheme":"file"
         }
      */
@@ -158,10 +158,10 @@ export default async function imageCompression(image: any) {
      * parsedPath
      * {
             "root":"/",
-            "dir":"/Users/didi/Documents/项目/didichuxing/image",
-            "base":"挽留弹窗8.0小程序@3x.png",
-            "ext":".png",
-            "name":"挽留弹窗8.0小程序@3x"
+            "dir":"",
+            "base":"",
+            "ext":"",
+            "name":""
         }
      */
 	const parsedPath = path.parse(image.fsPath);
