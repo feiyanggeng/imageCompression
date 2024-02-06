@@ -105,7 +105,8 @@ function readConfiguration(dir: string): Promise<ICostomConfig> {
         const customConfig: ICostomConfig = {
             ...config,
             quality,
-            destination
+            destination,
+            type: 'webp'
         };
 
         if (customConfig.showSelection) {
